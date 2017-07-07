@@ -20,6 +20,7 @@ public class Room
 {
     private String description;
     private HashMap<String, Room> exits;        // stores exits of this room.
+    private Inventory inventory; 
 
     /**
      * Create a room described "description". Initially, it has no exits.
@@ -29,6 +30,7 @@ public class Room
     public Room(String description)
     {
         this.description = description;
+        inventory = new Inventory();
         exits = new HashMap<String, Room>();
     }
 
@@ -80,4 +82,9 @@ public class Room
     {
         return (Room)exits.get(direction);
     }
+
+	public Inventory getInventory() {
+		// TODO Auto-generated method stub
+		return inventory;
+	}
 }

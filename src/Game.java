@@ -19,18 +19,23 @@ class Game
 {
     private Parser parser;
     private Player player;
-    private Room lobby, outside, pub, restaurant, office, hotelRoom;
+    Room lobby, outside, pub, restaurant, office, hotelRoom, secretRoom;
+    Item key, food, specialDrink, box, poison;
+    
 
     public Game()
     {
         parser = new Parser();
         player = new Player();
+        createItems();
         createRooms();
     }
 
     /**
      * Create all the rooms and link their exits together.
      */
+    
+
     private void createRooms()
     {
         
@@ -42,7 +47,10 @@ class Game
         restaurant = new Room("in the hotels restaurant");
         office = new Room("in the computing admin office");
         hotelRoom = new Room("in your own room");
+        secretRoom = new Room("in the secret room, search the drink!!");
 
+        lobby.getInventory().addItem(key);
+        
         // initialise room exits
         lobby.setExit("east", outside);
         lobby.setExit("south", restaurant);
@@ -59,12 +67,20 @@ class Game
         office.setExit("west", restaurant);
         
         hotelRoom.setExit("down", lobby);
+        hotelRoom.setExit("airshaft", secretRoom);
         player.setCurrentRoom(lobby);  // start game lobby
     }
+    private void createItems()
+    {
+      
+        key = new Item("key");
+        food = new Item("Food");
+        specialDrink = new Item("The special drink");
+        key.setWeight(3);
+        food.setWeight(7);
+    }
 
-    /**
-     *  Main play routine.  Loops until end of play.
-     */
+
     public void play()
     {
         printWelcome();
@@ -86,9 +102,8 @@ class Game
     private void printWelcome()
     {
         System.out.println();
-        System.out.println("Welcome to Adventure!");
-        System.out.println("Adventure is a new, incredibly boring adventure game.");
-        System.out.println("Type 'help' if you need help.");
+        System.out.println("Welcome to Cursed!");
+        System.out.println("Enjoy my textadventure");
         System.out.println();
         System.out.println(player.getCurrentRoom().getLongDescription());
     }
@@ -98,6 +113,7 @@ class Game
      * If this command ends the game, true is returned, otherwise false is
      * returned.
      */
+    
     public boolean processCommand(Command command)
     {
         boolean wantToQuit = false;
@@ -112,25 +128,27 @@ class Game
             printHelp();
         else if (commandWord.equals("go"))
             goRoom(command);
-        else if(commandWord.equals("look")){
+        else if(commandWord.equals("look"))
         	look(command);
-        }
         else if (commandWord.equals("quit"))
             wantToQuit = quit(command);
         else if(commandWord.equals("eat"))
-        	if(player.getCurrentRoom() == restaurant){
-        		if(player.health>= 100){
-        			System.out.println("You are already full!");
-        		}else{
-        			player.heal();
-        		}
-        		
-        	}else{
-        		System.out.println("You can only eat in the restaurant!");
+        	player.eat();
+        else if(commandWord.equals("take")){
+        	if(command.hasSecondWord()){
+        		player.Pickup(command.getSecondWord());
         	}
-
+        	else{
+        		System.out.println("What do we need to take?");
+        	}
+        }
+        else if (commandWord.equals("inventory"))
+        	System.out.println(player.getInventory().showItems());
         	
+        else if(commandWord.equals("drop"))
+        	player.dropItem(command.getSecondWord());
         return wantToQuit;
+        
         
         
     }
@@ -143,6 +161,8 @@ class Game
      * command words.
      * magic box, you are cursed and in the magic box is a poison what can help you solve your curse.
      */
+    
+    
     private void printHelp()
     {
         System.out.println("You are cursed, and in the hotel is a box.");
@@ -188,7 +208,7 @@ class Game
     }
     private void look(Command command){
     	if(!command.hasSecondWord()){
-    		System.out.println(player.getCurrentRoom().getLongDescription());
+    		System.out.println(player.getCurrentRoom().getLongDescription() + "\n" + player.getCurrentRoom().getInventory().showItems());
     		return;
     	}
     		
