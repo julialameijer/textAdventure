@@ -11,6 +11,7 @@ public class Player {
 	public Room getCurrentRoom() {
 		return room;
 	}
+	
 	public void Pickup(String itemName){
 		Item removedItem = getCurrentRoom().getInventory().removeItem(itemName);
 		
@@ -30,8 +31,8 @@ public class Player {
 		getCurrentRoom().getInventory().addItem(addItemToRoom);
 	}
 	
+	
 	public Inventory getInventory() {
-		// TODO Auto-generated method stub
 		return inventory;
 	}
 
@@ -43,7 +44,8 @@ public class Player {
 		health -= 10; 
 	}
 	public void damage(){
-		health -= 10;
+		health -= 20;
+		System.out.println("You took 20 damage");
 	}
 	public void heal(){
 		health = health += 10;

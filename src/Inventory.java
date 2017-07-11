@@ -20,6 +20,16 @@ public class Inventory {
 		itemList.add(item);
 	}
 	
+	public void useItem(String itemName){
+		for(int i = 0; i < itemList.size(); i++){
+			if(itemList.get(i).getName().compareTo(itemName) == 0){
+
+				itemList.get(i).use();
+			}
+		}
+		System.out.println("You can't use that item");
+	}
+	
 	public Item removeItem(String itemName){
 		Item removedItem = null; 
 		for (Item item : itemList) {
@@ -33,9 +43,5 @@ public class Inventory {
 			itemList.remove(removedItem);
 		}
 		return removedItem;
-	}
-	public void calculateItems(){
-		int totalItems = itemList.size();
-		System.out.println(totalItems);
 	}
 }

@@ -19,21 +19,16 @@ class Game
 {
     private Parser parser;
     private Player player;
+    private Item item;
     Room lobby, outside, pub, restaurant, office, hotelRoom, secretRoom;
-    Item key, food, specialDrink, box, poison;
     
 
     public Game()
     {
         parser = new Parser();
         player = new Player();
-        createItems();
         createRooms();
     }
-
-    /**
-     * Create all the rooms and link their exits together.
-     */
     
 
     private void createRooms()
@@ -46,12 +41,19 @@ class Game
         pub = new Room("in the hotel club");
         restaurant = new Room("in the hotels restaurant");
         office = new Room("in the computing admin office");
-        hotelRoom = new Room("in your own room");
+        hotelRoom = new Room("in your own room..." + ".\n" + "huh.. Maybe you can open the air vent and go trough the airshaft..");
         secretRoom = new Room("in the secret room, search the drink!!");
+        
+        Key key = new Key("key", 1, player); 
+        Poison drink = new Poison("drink", 5, player);
 
         lobby.getInventory().addItem(key);
+        hotelRoom.getInventory().addItem(drink);
         
-        // initialise room exits
+        hotelRoom.addOpenKey(key);
+        hotelRoom.closeRoom();
+        
+        
         lobby.setExit("east", outside);
         lobby.setExit("south", restaurant);
         lobby.setExit("west", pub);
@@ -68,17 +70,13 @@ class Game
         
         hotelRoom.setExit("down", lobby);
         hotelRoom.setExit("airshaft", secretRoom);
+        
+        secretRoom.setExit("airshaft", hotelRoom);
+        
         player.setCurrentRoom(lobby);  // start game lobby
+        
     }
-    private void createItems()
-    {
-      
-        key = new Item("key");
-        food = new Item("Food");
-        specialDrink = new Item("The special drink");
-        key.setWeight(3);
-        food.setWeight(7);
-    }
+
 
 
     public void play()
@@ -96,9 +94,6 @@ class Game
         System.out.println("Thank you for playing.  Good bye.");
     }
 
-    /**
-     * Print out the opening message for the player.
-     */
     private void printWelcome()
     {
         System.out.println();
@@ -108,12 +103,6 @@ class Game
         System.out.println(player.getCurrentRoom().getLongDescription());
     }
 
-    /**
-     * Given a command, process (that is: execute) the command.
-     * If this command ends the game, true is returned, otherwise false is
-     * returned.
-     */
-    
     public boolean processCommand(Command command)
     {
         boolean wantToQuit = false;
@@ -142,6 +131,9 @@ class Game
         		System.out.println("What do we need to take?");
         	}
         }
+        else if(commandWord.equals("use")){
+        	player.getInventory().useItem(command.getSecondWord());
+        }
         else if (commandWord.equals("inventory"))
         	System.out.println(player.getInventory().showItems());
         	
@@ -153,30 +145,18 @@ class Game
         
     }
 
-    // implementations of user commands:
-
-    /**
-     * Print out some help information.
-     * Here we print some stupid, cryptic message and a list of the
-     * command words.
-     * magic box, you are cursed and in the magic box is a poison what can help you solve your curse.
-     */
-    
-    
     private void printHelp()
     {
         System.out.println("You are cursed, and in the hotel is a box.");
         System.out.println("You went over to the hotel to find that box.");
         System.out.println("in that very special box is a poison what can help you solve your curse.");
+        System.out.println("Because of the curse, you're losing health every step you take..");
+        System.out.println("If your health is running low, you can go to the restaurant and eat something");
         System.out.println();
         System.out.println("Your command words are:");
         parser.showCommands();
     }
 
-    /**
-     * Try to go to one direction. If there is an exit, enter the new
-     * room, otherwise print an error message.
-     */
     private void goRoom(Command command)
     {
         if(!command.hasSecondWord()) {
@@ -190,7 +170,12 @@ class Game
 
         // Try to leave current room.
         Room nextRoom = player.getCurrentRoom().getExit(direction);
-
+        
+        if(!nextRoom.isOpen()){
+        	System.out.println("The door is closed, search the key");
+        	return;
+        }
+        
         if (nextRoom == null)
             System.out.println("There is no door!");
         else {
@@ -214,11 +199,7 @@ class Game
     		
     }
 
-    /**
-     * "Quit" was entered. Check the rest of the command to see
-     * whether we really quit the game. Return true, if this command
-     * quits the game, false otherwise.
-     */
+
     public boolean quit(Command command)
     {
         if(command.hasSecondWord()) {
@@ -228,7 +209,6 @@ class Game
         else
             return true;  // signal that we want to quit
     }
-
 
     public static void main(String[] args)
     {

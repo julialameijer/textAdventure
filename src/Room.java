@@ -1,6 +1,8 @@
 import java.util.Set;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 
 /*
  * Class Room - a room in an adventure game.
@@ -21,6 +23,9 @@ public class Room
     private String description;
     private HashMap<String, Room> exits;        // stores exits of this room.
     private Inventory inventory; 
+    private boolean isOpen = true;
+    private List <Key> keys;
+    
 
     /**
      * Create a room described "description". Initially, it has no exits.
@@ -32,6 +37,7 @@ public class Room
         this.description = description;
         inventory = new Inventory();
         exits = new HashMap<String, Room>();
+        keys = new ArrayList<Key>();
     }
 
     /**
@@ -84,7 +90,49 @@ public class Room
     }
 
 	public Inventory getInventory() {
-		// TODO Auto-generated method stub
-		return inventory;
+		return this.inventory;
 	}
+	public boolean isOpen(){
+		return isOpen;
+	}
+	public void closeRoom(){
+		this.isOpen = false;
+		
+	}
+	public void openRoom(){
+		this.isOpen = true;
+		
+	}
+	public void addOpenKey(Key key){
+		keys.add(key);
+	}
+	public List<Key> getKeys(){
+		return this.keys;
+	}
+	public void canOpen(Key key){
+		Room room  = this.getExit("up");
+		if(room == null)return;
+		List<Key> _keys = room.getKeys();
+		Iterator it = _keys.iterator();
+		while(it.hasNext()){
+			Key _key = (Key)it.next();
+			if(key.getName().equalsIgnoreCase(_key.getName())){
+				System.out.println("You opened your room");
+				room.openRoom();
+				return;
+				
+			}
+		}
+	}
+	public ArrayList<Room> getClosedRooms(){
+		ArrayList<Room> rooms = new ArrayList<Room>();
+		for(int i = 0; i < exits.size(); i++){
+			if(this.getExit(getExitString()).isOpen == false){
+				rooms.add(this.getExit(getExitString()));
+			}
+		}
+		return rooms;
+	}
+	
+
 }
